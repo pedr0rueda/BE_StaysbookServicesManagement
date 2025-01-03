@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,18 +29,28 @@ public class StayService implements IStayService {
 	@Override
 	public List<StayServicesDTO> getServicesByStaysJpa(String idStays) {
 
-		List<String> idStaysList = Arrays.asList(idStays.split(","));
-		List<ServiceByStayDTO> servicesByStaysList = stayServiceJpaRepository.getServicesByStays(idStaysList);
+		// List<String> idStaysListCad = Arrays.asList(idStays.split(","));
+		// List<Long> idStaysListNumber =
+		// idStaysListCad.stream().map(Long::valueOf).collect(Collectors.toList());
+		List<Long> idStaysListNumber = Arrays.asList(idStays.split(",")).stream().map(Long::valueOf)
+				.collect(Collectors.toList());
+		List<ServiceByStayDTO> servicesByStaysList = stayServiceJpaRepository.getServicesByStays(idStaysListNumber);
 
 		Map<Long, StayServicesDTO> stayServicesMap = new LinkedHashMap<>();
 
 		for (ServiceByStayDTO serviceStay : servicesByStaysList) {
-			// Obtengo el 
+			// Si en el mapa stayServicesMap ya existe el IdStay devuelve el registro
+			// StayServicesDTO del mapa,
+			// en caso contrario crea un nuevo StayServicesDTO con los valores del IdStay.
 			StayServicesDTO stayServices = stayServicesMap.getOrDefault(serviceStay.getIdStay(),
-					new StayServicesDTO(serviceStay.getIdStay(), serviceStay.getNameStay(), serviceStay.getDescriptionStay(), new ArrayList<>()));
-			
+					new StayServicesDTO(serviceStay.getIdStay(), serviceStay.getNameStay(),
+							serviceStay.getDescriptionStay(), new ArrayList<>()));
+
+			// Se adiciona el Service al Stay.
 			stayServices.getServices().add(new ServiceEntity(serviceStay.getIdService(), serviceStay.getNameService()));
-			
+
+			// Se adiciona el StayServicesDTO al mapa stayServicesMap, si no existe lo crea,
+			// en caso contrario lo reemplaza.
 			stayServicesMap.put(serviceStay.getIdStay(), stayServices);
 		}
 
@@ -49,15 +60,16 @@ public class StayService implements IStayService {
 	@Override
 	public List<StayServicesDTO> getServicesByStaysProc(String idStays) {
 		List<ServiceByStayDTO> servicesByStaysList = stayServiceRepository.getServicesByStays(idStays);
-		
+
 		Map<Long, StayServicesDTO> stayServicesMap = new LinkedHashMap<>();
 
 		for (ServiceByStayDTO serviceStay : servicesByStaysList) {
 			StayServicesDTO stayServices = stayServicesMap.getOrDefault(serviceStay.getIdStay(),
-					new StayServicesDTO(serviceStay.getIdStay(), serviceStay.getNameStay(), serviceStay.getDescriptionStay(), new ArrayList<>()));
-			
+					new StayServicesDTO(serviceStay.getIdStay(), serviceStay.getNameStay(),
+							serviceStay.getDescriptionStay(), new ArrayList<>()));
+
 			stayServices.getServices().add(new ServiceEntity(serviceStay.getIdService(), serviceStay.getNameService()));
-			
+
 			stayServicesMap.put(serviceStay.getIdStay(), stayServices);
 		}
 
