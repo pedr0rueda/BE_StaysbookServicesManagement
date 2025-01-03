@@ -20,5 +20,5 @@ public interface IStayServiceJpaRepository extends JpaRepository<ServiceEntity, 
 			+ "INNER JOIN ServiceEntity     se ON se.idService = ss.idService "
 			+ "WHERE st.idStay IN :idStays "
 			+ "ORDER BY st.idStay, se.idService")
-	List<ServiceByStayDTO> getServicesByStays(@Param("idStays") List<String> idStays);
+	List<ServiceByStayDTO> getServicesByStays(@Param("idStays") List<Long> idStays);
 }
